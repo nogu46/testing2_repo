@@ -1,0 +1,52 @@
+function myFunction() {
+  // === 0. 定数宣言と起動 ===
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetParam = ss.getSheetByName("シート1");
+  // const msgOffset = 4;
+  // let msgCount = 0;
+  // sheetParam.getRange("C" + (msgOffset + msgCount++)).setValue("プログラムが作業を開始しました。");
+
+  // === 1. 設定 ===
+  // sheetParam.getRange("C" + (msgOffset + msgCount++)).setValue("シートＩＤを読み込んでいます。");
+  // =INDEX(SPLIT($F$9,"/"),5)
+  const sheetId = sheetParam.getRange("F10").getValue()
+  Logger.log('sheetId = ' + sheetId);
+
+  // sheetParam.getRange("C" + (msgOffset + msgCount++)).setValue("スライドＩＤを読み込んでいます。");
+  const slideId = sheetParam.getRange("F14").getValue()
+  Logger.log('slideId = ' + slideId);
+
+  // === 2. データ取得 スライドからテーブルを取得する ===
+  const sheetName = "テーブル"
+  const rangeStr = "テーブル" + "!C5:F8"; // 表D-Cの範囲（A1:D5など）
+  const sheet = SpreadsheetApp.openById(sheetId).getRange(rangeStr);
+  const values = sheet.getValues();
+  const numRows = values.length;
+  const numCols = values[0].length;
+
+  // === 3. スライドを開く ===
+  const presentation = SlidesApp.openById(slideId);
+  const slide = presentation.getSlides()[0]; // 最初のスライドと仮定
+
+  // === 4. テーブルをスライドに挿入 ===
+  const table = slide.insertTable(numRows, numCols);
+
+  for (let row = 0; row < numRows; row++) {
+    for (let col = 0; col < numCols; col++) {
+      table.getCell(row, col).getText().setText(values[row][col]);
+    }
+  }
+  
+  // === 表の位置を調整 ===
+  const left = 0; // X座標（左からの距離）
+  const top = 0;  // Y座標（上からの距離）
+  table.setLeft(left);
+  table.setTop(top);
+
+  // （オプション）幅・高さの調整も可能
+  table.setHeight(200);
+  table.setWidth(400);
+
+
+  Logger.log('新しいテーブルをスライドに挿入しました。');
+}
